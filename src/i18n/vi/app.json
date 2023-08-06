@@ -1,0 +1,22 @@
+{
+  "PING": "Pong",
+  "HELLO": "Xin chào",
+  "PRODUCT": {
+    "NEW": "Sản phẩm mới: {name}"
+  },
+  "ENGLISH": "Tiếng Anh",
+  "ARRAY": ["Một", "Hai", "Ba"],
+  "cat": "Mèo",
+  "cat_name": "Mèo: {name}",
+  "set-up-password": {
+    "heading": "Xin chào, {username}",
+    "title": "Quên mật khẩu",
+    "followLink": "Làm ơn nhấn vào đây để đặt lại mật khẩu của bạn"
+  },
+  "day_interval": {
+    "one": "Mỗi ngày",
+    "other": "Mỗi {count} ngày",
+    "zero": "Không bao giờ"
+  },
+  "nested": "Chúng tôi đi mua sắm: $t(test.day_interval, {{\"count\": {count} }})"
+}
