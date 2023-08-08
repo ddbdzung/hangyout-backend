@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from '../dtos/create-users.dto';
 import { UserRepository } from '../repositories/user.repository';
-import { PaginationQueryParam } from '../users.type';
+import { PaginationQueryParam } from '../dtos/shared/Pagination';
 
 @Injectable()
 export class UsersService {

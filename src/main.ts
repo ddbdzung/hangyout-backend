@@ -8,6 +8,8 @@ import * as compression from 'compression';
 
 import { AppModule } from './app.module';
 import { winstonLogger } from './config/logger.config';
+import { createDocs } from './config/docs.config';
+import { SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,6 +28,7 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
+  SwaggerModule.setup('/document-api', app, createDocs(app));
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
+import { Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 
@@ -13,7 +14,6 @@ import { IS_PUBLIC_KEY } from '@/common/decorators/Public.decorator';
 import { UserRepository } from '@/modules/users/repositories/user.repository';
 import { LoggerService } from '@/global/logger/logger.service';
 import { Tag } from '@/global/logger/logger.constant';
-import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -35,7 +35,6 @@ export class AuthGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const token = this._extractTokenFromHeader(request);
-    LoggerService.log(Tag.DEBUG, 'Token', token);
     if (!token) {
       throw new UnauthorizedException();
     }
