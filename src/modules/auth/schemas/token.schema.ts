@@ -1,9 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
+import { ConfigService } from '@nestjs/config';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { winstonLogger } from '@/config/logger.config';
+
 import { TOKEN_TYPE } from '../auth.constant';
-import { ConfigService } from '@nestjs/config';
 
 export type TokenDocument = HydratedDocument<Token>;
 
@@ -11,9 +13,18 @@ export type TokenDocument = HydratedDocument<Token>;
   timestamps: true,
 })
 export class Token {
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
   @Prop({ required: true, index: true })
   token: string;
 
+  @ApiProperty({
+    example: '60b9b0b9e1b9f3b3e0b9b0b9',
+    type: SchemaTypes.ObjectId,
+    required: true,
+  })
   @Prop({
     type: SchemaTypes.ObjectId,
     index: true,
@@ -22,12 +33,24 @@ export class Token {
   })
   user: Types.ObjectId;
 
+  @ApiProperty({
+    enum: TOKEN_TYPE,
+    required: true,
+  })
   @Prop({ required: true })
   type: TOKEN_TYPE;
 
+  @ApiProperty({
+    type: Date,
+    required: true,
+  })
   @Prop({ required: true })
   expiresAt: Date;
 
+  @ApiProperty({
+    type: Boolean,
+    default: false,
+  })
   @Prop({ default: false })
   blacklisted: boolean;
 }

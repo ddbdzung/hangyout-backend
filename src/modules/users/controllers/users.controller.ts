@@ -2,29 +2,43 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Query,
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { JoiValidationPipe } from '@/common/pipes/joi-validation.pipe';
 import { PoliciesGuard } from '@/global/casl/policy.guard';
 import { CheckPolicies } from '@/global/casl/Policy.decorator';
+import {
+  BadRequestResponseDto,
+  ForbiddenResponseDto,
+  UnauthorizedResponseDto,
+} from '@/common/dto.common';
 
 import { UsersService } from './../services/users.service';
 import { CreateUserDto } from './../dtos/create-users.dto';
 import { createUserSchema } from './../validations/create-user.validation';
-import { PaginationQueryParam, PaginationResult } from '../users.type';
 import { getUsersQuery } from '../validations/get-users.validation';
-import { User } from '../schemas/user.schema';
+import { ManageUsersPolicyHandler } from '../users.policy';
 import {
-  ManageUsersPolicyHandler,
-  ReadUserPolicyHandler,
-} from '../users.policy';
+  PaginationQueryParam,
+  PaginationResult,
+} from '../dtos/shared/Pagination';
+import { GetUserResponseDto } from '../dtos/get-users.dto';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(
@@ -32,6 +46,7 @@ export class UsersController {
     private readonly authService: AuthService,
   ) {}
 
+  // TODO: Refactor this endpoint
   @Post()
   @UsePipes(new JoiValidationPipe(createUserSchema))
   async createUser(@Body() createUserDto: CreateUserDto): Promise<any> {
@@ -40,6 +55,27 @@ export class UsersController {
     return this.authService.excludeUserPassword(createdUser);
   }
 
+  @ApiOperation({
+    summary: 'Get users',
+    description: 'Get users - Only admin can access this resource',
+  })
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description: 'Get users successfully',
+    type: GetUserResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request - Invalid query params',
+    type: BadRequestResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid access token',
+    type: UnauthorizedResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden resource - Only admin can access this resource',
+    type: ForbiddenResponseDto,
+  })
   @Get()
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new ManageUsersPolicyHandler())

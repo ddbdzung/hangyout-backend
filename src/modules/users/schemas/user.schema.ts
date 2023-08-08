@@ -1,11 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
+import { ApiProperty } from '@nestjs/swagger';
 import * as bcrypt from 'bcrypt';
 
 import { winstonLogger } from '@/config/logger.config';
 
-import { ROLE } from '../users.constant';
+import { ROLE, SALT_ROUNDS } from '../users.constant';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -26,37 +27,70 @@ export class HydratedUserDocument {
   timestamps: true,
 })
 export class User {
+  @ApiProperty({
+    example: 'Dang Duc Bao Dung',
+    type: String,
+    required: true,
+    maxLength: 50,
+    minLength: 1,
+  })
   @Prop({ required: true, maxLength: 50, minLength: 1 })
   fullname: string;
 
+  @ApiProperty({
+    example: 'example@hotmail.com',
+    type: String,
+    required: true,
+    maxLength: 256,
+    minLength: 1,
+  })
   @Prop({
     required: true,
-    unique: true,
     maxLength: 256,
     minLength: 1,
     index: true,
   })
   email: string;
 
+  @ApiProperty({
+    example: 'hashedPassword',
+    type: String,
+    required: true,
+  })
   @Prop({ required: true })
   password: string;
 
+  @ApiProperty({
+    enum: ROLE,
+    default: ROLE.USER,
+  })
   @Prop({ default: ROLE.USER })
   role: ROLE;
 
+  @ApiProperty({
+    example: 'https://example.com/avatar.png',
+    type: String,
+    maxLength: 256,
+  })
   @Prop({ maxLength: 256 })
   avatar: string;
 
+  @ApiProperty({
+    example: 'I am a student',
+    type: String,
+  })
   @Prop({ maxLength: 500 })
   bio: string;
 
+  @ApiProperty({
+    type: Boolean,
+    default: false,
+  })
   @Prop({ default: false })
   isVerified: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-export const SALT_ROUNDS = 10;
 
 export const UserFactory = () => {
   const schema = UserSchema;

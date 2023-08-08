@@ -8,12 +8,12 @@ import { I18nService } from 'nestjs-i18n';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { UsersService } from '@/modules/users/services/users.service';
 import { ROLE } from '@/modules/users/users.constant';
-import { SALT_ROUNDS } from '@/modules/users/schemas/user.schema';
+import { SALT_ROUNDS } from '@/modules/users/users.constant';
+import { UsersModule } from '@/modules/users/users.module';
+import { AuthModule } from '@/modules/auth/auth.module';
 
 import { MongoDBService } from './services/mongo.service';
 import { AppModule } from '../src/app.module';
-import { UsersModule } from '@/modules/users/users.module';
-import { AuthModule } from '@/modules/auth/auth.module';
 
 describe('UserController /users (e2e)', () => {
   let app: INestApplication;
