@@ -78,7 +78,7 @@ export class MongoDBService {
     return collection.find(query).project(projection).toArray();
   }
 
-  async queryForWork(
+  async queryForWord(
     collectionName: string,
     query: any,
     projection = {},

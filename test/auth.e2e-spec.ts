@@ -17,12 +17,12 @@ import {
   IRefreshTokenPayload,
   IVerifyEmailTokenPayload,
 } from '@/modules/auth/auth.interface';
+import { UsersService } from '@/modules/users/services/users.service';
+import { AuthService } from '@/modules/auth/services/auth.service';
 
 import { LocalRegisterDto } from './../src/modules/auth/dtos/register.dto';
 import { AppModule } from './../src/app.module';
 import { MongoDBService } from './services/mongo.service';
-import { UsersService } from '@/modules/users/services/users.service';
-import { AuthService } from '@/modules/auth/services/auth.service';
 
 describe('AuthController /auth (e2e)', () => {
   let app: INestApplication;
@@ -60,9 +60,9 @@ describe('AuthController /auth (e2e)', () => {
     authService = app.get<AuthService>(AuthService);
     i18n = moduleFixture.get<I18nService>(I18nService);
     jwt = moduleFixture.get<JwtService>(JwtService);
-    await mongodb.createIndex('users', { email: 1 }, { unique: true });
-    await mongodb.createIndex('tokens', { user: 1, type: 1 });
-    await mongodb.createIndex('tokens', { token: 1 });
+    // await mongodb.createIndex('users', { email: 1 }, { unique: true });
+    // await mongodb.createIndex('tokens', { user: 1, type: 1 });
+    // await mongodb.createIndex('tokens', { token: 1 });
   });
 
   beforeEach(async () => {
