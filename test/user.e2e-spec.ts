@@ -50,7 +50,7 @@ describe('UserController /users (e2e)', () => {
     i18n = app.get<I18nService>(I18nService);
     authService = app.get<AuthService>(AuthService);
     usersService = app.get<UsersService>(UsersService);
-    await mongodb.createIndex('users', { email: 1 }, { unique: true });
+    // await mongodb.createIndex('users', { email: 1 }, { unique: true });
   });
 
   beforeEach(async () => {
