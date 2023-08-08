@@ -7,7 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ObjectId } from 'mongodb';
 
-import { SALT_ROUNDS } from '@/modules/users/schemas/user.schema';
+import { SALT_ROUNDS } from '@/modules/users/users.constant';
 import { TOKEN_TYPE } from '@/modules/auth/auth.constant';
 import { LocalLoginDto } from '@/modules/auth/dtos/login.dto';
 import { ROLE } from '@/modules/users/users.constant';
