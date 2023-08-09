@@ -16,7 +16,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PostsModule } from './modules/posts/posts.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { I18nCustomModule } from './global/i18n/i18n.module';
@@ -113,7 +112,6 @@ const toMsFromSecond = (second: number): number => second * 1000;
       },
     }),
     CaslModule,
-    PostsModule,
     UsersModule,
     AuthModule,
     I18nCustomModule,
