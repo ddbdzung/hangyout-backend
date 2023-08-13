@@ -119,7 +119,7 @@ export class User {
     enum: ROLE,
     default: ROLE.USER,
   })
-  @Prop({ default: ROLE.USER })
+  @Prop({ default: ROLE.USER, index: true })
   role: ROLE;
 
   @ApiProperty({

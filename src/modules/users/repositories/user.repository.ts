@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
@@ -15,8 +15,8 @@ export class UserRepository extends BaseRepository<UserDocument> {
     super(userModel);
   }
 
-  async countAll(): Promise<number> {
-    return this.userModel.countDocuments();
+  async countAll(filter: FilterQuery<any> = {}): Promise<number> {
+    return this.userModel.countDocuments(filter);
   }
 
   async findOneByEmail(email: string): Promise<UserDocument> {
