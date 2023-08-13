@@ -5,6 +5,7 @@ import { UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from '../dtos/create-users.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { PaginationQueryParam } from '../dtos/shared/Pagination';
+import { ROLE } from '../users.constant';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +16,7 @@ export class UsersService {
   }
 
   async countUsers(): Promise<number> {
-    return this.userRepository.countAll();
+    return this.userRepository.countAll({ role: { $ne: ROLE.SUPERADMIN } });
   }
 
   async isEmailTaken(email: string): Promise<boolean> {
@@ -34,7 +35,8 @@ export class UsersService {
 
   async getUsers(query: PaginationQueryParam, { lean = false }) {
     const { page, size } = query;
-    const filter = {}; // Find all
+
+    const filter = { role: { $ne: ROLE.SUPERADMIN } };
     const projection = '-password';
 
     return this.userRepository.findAllByCondition(filter, projection, {
