@@ -34,6 +34,7 @@ export class UsersService {
 
   async getUsers(query: PaginationQueryParam, { lean = false }) {
     const { page, size } = query;
+    // TODO: Admin can not get superadmin user
     const filter = {}; // Find all
     const projection = '-password';
 

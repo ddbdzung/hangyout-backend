@@ -6,15 +6,14 @@ import {
   ExtractSubjectType,
   InferSubjects,
 } from '@casl/ability';
-
-import { HydratedUserDocument } from '@/modules/users/schemas/user.schema';
+import { Types } from 'mongoose';
 
 import { ROLE } from '@/modules/users/users.constant';
+import { HydratedUserDocument } from '@/modules/users/schemas/user.schema';
 
 import { Action } from './casl.constant';
-import { Types } from 'mongoose';
-type Subjects = InferSubjects<typeof HydratedUserDocument> | 'all';
 
+type Subjects = InferSubjects<typeof HydratedUserDocument> | 'all';
 export type AppAbility = Ability<[Action, Subjects]>;
 export type RequestUser = {
   _id: Types.ObjectId;
@@ -22,6 +21,14 @@ export type RequestUser = {
   email: string;
   role: ROLE;
 };
+
+/**
+ * @note Admin can not create, read, update or delete superadmin
+ * @note Admin can not create, update or delete other admin
+ * @note Admin can not delete himself
+ * @note Superadmin can not be updated or deleted by himself
+ * @note Superadmin can manage all other users
+ */
 @Injectable()
 export class CaslAbilityFactory {
   createForUser(user: RequestUser) {
@@ -29,13 +36,21 @@ export class CaslAbilityFactory {
       Ability<[Action, Subjects]>
     >(Ability as AbilityClass<AppAbility>);
     switch (user.role) {
+      case ROLE.SUPERADMIN:
+        can(Action.Create, HydratedUserDocument, {
+          role: { $ne: ROLE.SUPERADMIN },
+        });
+        can(Action.Read, HydratedUserDocument);
+        break;
+
       case ROLE.ADMIN:
-        can(Action.Manage, 'all'); // read-write access to everything
+        can(Action.Create, HydratedUserDocument, {
+          role: { $nin: [ROLE.SUPERADMIN, ROLE.ADMIN] },
+        });
+        can(Action.Read, HydratedUserDocument);
         break;
 
       case ROLE.USER:
-        can(Action.Read, HydratedUserDocument, { _id: user._id }); // read-only access to User itself
-        can(Action.Update, HydratedUserDocument, { _id: user._id }); // read-write access to User itself
         break;
 
       default:
