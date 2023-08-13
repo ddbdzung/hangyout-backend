@@ -37,7 +37,7 @@ export class UsersService {
     const { page, size } = query;
 
     const filter = { role: { $ne: ROLE.SUPERADMIN } };
-    const projection = '-password';
+    const projection = '_id fullname email role createdAt';
 
     return this.userRepository.findAllByCondition(filter, projection, {
       lean,
