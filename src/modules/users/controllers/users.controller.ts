@@ -31,7 +31,10 @@ import { UsersService } from './../services/users.service';
 import { CreateUserDto } from './../dtos/create-users.dto';
 import { createUserSchema } from './../validations/create-user.validation';
 import { getUsersQuery } from '../validations/get-users.validation';
-import { ManageUsersPolicyHandler } from '../users.policy';
+import {
+  CreateUserPolicyHandler,
+  ReadUsersPolicyHandler,
+} from '../users.policy';
 import {
   PaginationQueryParam,
   PaginationResult,
@@ -46,10 +49,28 @@ export class UsersController {
     private readonly authService: AuthService,
   ) {}
 
-  // TODO: Refactor this endpoint
+  @ApiOperation({
+    summary: 'Create user',
+    description: 'Create user - Only admin can access this resource',
+  })
+  @ApiBearerAuth()
+  @ApiBadRequestResponse({
+    description: 'Bad request - Invalid query params',
+    type: BadRequestResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid access token',
+    type: UnauthorizedResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden resource - Only admin can access this resource',
+    type: ForbiddenResponseDto,
+  })
   @Post()
   @UsePipes(new JoiValidationPipe(createUserSchema))
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<any> {
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies(new CreateUserPolicyHandler())
+  async createUser(@Body() createUserDto: CreateUserDto) {
     const createdUser = await this.usersService.createUser(createUserDto);
 
     return this.authService.excludeUserPassword(createdUser);
@@ -78,7 +99,7 @@ export class UsersController {
   })
   @Get()
   @UseGuards(PoliciesGuard)
-  @CheckPolicies(new ManageUsersPolicyHandler())
+  @CheckPolicies(new ReadUsersPolicyHandler())
   async getUsers(
     @Query(new JoiValidationPipe(getUsersQuery))
     query: PaginationQueryParam,

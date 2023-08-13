@@ -28,7 +28,9 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-  SwaggerModule.setup('/document-api', app, createDocs(app));
+  if (process.env.NODE_ENV === 'development') {
+    SwaggerModule.setup('/document-api', app, createDocs(app));
+  }
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

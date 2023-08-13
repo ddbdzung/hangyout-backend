@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 
 import { winstonLogger } from '@/config/logger.config';
 
-import { ROLE, SALT_ROUNDS } from '../users.constant';
+import { GENDER, ROLE, SALT_ROUNDS } from '../users.constant';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -21,6 +21,61 @@ export class HydratedUserDocument {
   avatar: string;
   bio: string;
   isVerified: boolean;
+  phoneNumber: {
+    value: string;
+    isHidden: boolean;
+  };
+  gender: {
+    value: string;
+    isHidden: boolean;
+  };
+}
+@Schema({
+  timestamps: false,
+  id: false,
+})
+class CanHideProperty {
+  value: any;
+  isHidden: boolean;
+}
+
+@Schema({
+  timestamps: false,
+  id: false,
+})
+class PhoneNumber extends CanHideProperty {
+  @ApiProperty({
+    example: '+84123456789',
+    type: String,
+  })
+  @Prop({ default: null, index: true, unique: true })
+  value: string;
+
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+  })
+  @Prop({ default: true })
+  isHidden: boolean;
+}
+
+class Gender extends CanHideProperty {
+  @ApiProperty({
+    example: GENDER.MALE,
+    type: String,
+  })
+  @Prop({
+    default: null,
+    type: String,
+  })
+  value: GENDER;
+
+  @ApiProperty({
+    example: true,
+    type: Boolean,
+  })
+  @Prop({ default: true })
+  isHidden: boolean;
 }
 
 @Schema({
@@ -88,6 +143,12 @@ export class User {
   })
   @Prop({ default: false })
   isVerified: boolean;
+
+  @ApiProperty({ type: PhoneNumber })
+  phoneNumber: PhoneNumber;
+
+  @ApiProperty({ type: Gender })
+  gender: Gender;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
