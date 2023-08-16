@@ -5,3 +5,7 @@ export enum Action {
   Update = 'update',
   Delete = 'delete',
 }
+
+export enum RequestAttachment {
+  PolicyParamUser = 'policyParamUser',
+}

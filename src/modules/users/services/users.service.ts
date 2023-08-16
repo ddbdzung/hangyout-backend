@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { Types, isObjectIdOrHexString } from 'mongoose';
 
 import { UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from '../dtos/create-users.dto';
@@ -11,8 +11,19 @@ import { ROLE } from '../users.constant';
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async getUserById(userId: Types.ObjectId): Promise<UserDocument> {
-    return this.userRepository.findById(userId);
+  _transformObjectId(id: any) {
+    if (!isObjectIdOrHexString(id)) {
+      throw new Error(
+        'Must be a valid ObjectId or string of 24 hex characters',
+      );
+    }
+
+    return new Types.ObjectId(id);
+  }
+
+  async getUserById(userId: Types.ObjectId | string): Promise<UserDocument> {
+    const id = this._transformObjectId(userId);
+    return this.userRepository.findById(id);
   }
 
   async countUsers(): Promise<number> {

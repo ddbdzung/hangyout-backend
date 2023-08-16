@@ -50,11 +50,13 @@ export class AuthGuard implements CanActivate {
       );
 
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
+      // TODO: Check if user is active
       if (!user) {
         throw new UnauthorizedException();
       }
 
       request['user'] = user;
+      // TODO: catch error
     } catch {
       throw new UnauthorizedException();
     }
