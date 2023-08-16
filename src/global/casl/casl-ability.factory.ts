@@ -47,7 +47,9 @@ export class CaslAbilityFactory {
         can(Action.Create, HydratedUserDocument, {
           role: { $nin: [ROLE.SUPERADMIN, ROLE.ADMIN] },
         });
-        can(Action.Read, HydratedUserDocument);
+        can(Action.Read, HydratedUserDocument, {
+          role: { $ne: ROLE.SUPERADMIN },
+        });
         break;
 
       case ROLE.USER:

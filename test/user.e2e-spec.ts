@@ -54,6 +54,9 @@ describe('UserController /users (e2e)', () => {
     // await mongodb.createIndex('users', { email: 1 }, { unique: true });
   });
 
+  // NOTE Check if user is deactivated or not
+  // NOTE Check if user is verify to use this API or not
+
   beforeEach(async () => {
     await mongodb.insertMany('users', [user]);
   });
@@ -311,7 +314,6 @@ describe('UserController /users (e2e)', () => {
           fullname,
           role: ROLE.USER,
         });
-      console.log(response.body);
 
       expect(response.status).toBe(201);
     });
@@ -356,6 +358,19 @@ describe('UserController /users (e2e)', () => {
       expect(response.status).toBe(403);
     });
 
+    it('should return 400 if user id is not valid', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/${'123'}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(400);
+    });
+
     it('should return 404 if user is not found', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
@@ -367,11 +382,7 @@ describe('UserController /users (e2e)', () => {
         .set('Authorization', 'Bearer ' + accessToken);
 
       expect(response.status).toBe(404);
-      expect(response.body.message).toBe({
-        statusCode: 404,
-        error: 'Not Found',
-        message: 'User not found',
-      });
+      expect(response.body.message).toBe('User not found');
     });
 
     it('should return 200 if user is found', async () => {
