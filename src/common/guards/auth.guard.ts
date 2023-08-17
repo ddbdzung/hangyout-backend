@@ -50,8 +50,7 @@ export class AuthGuard implements CanActivate {
       );
 
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
-      // TODO: Check if user is active
-      if (!user) {
+      if (!user || user.isVerified === false) {
         throw new UnauthorizedException();
       }
 
