@@ -4,8 +4,7 @@ import { UserResponse } from './shared/UserResponse';
 
 import { PaginationResult } from './shared/Pagination';
 
-// TODO: Rename to GetUsersResponseDto
-export class GetUserResponseDto {
+export class GetUsersResponseDto {
   @ApiProperty({
     description: 'Users',
     type: UserResponse,

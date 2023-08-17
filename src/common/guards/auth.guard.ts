@@ -56,8 +56,7 @@ export class AuthGuard implements CanActivate {
       }
 
       request['user'] = user;
-      // TODO: catch error
-    } catch {
+    } catch (error) {
       throw new UnauthorizedException();
     }
     return true;
