@@ -12,6 +12,12 @@ export class BadRequestResponseDto {
     type: String,
   })
   message: string;
+
+  @ApiProperty({
+    default: 'Bad Request',
+    type: String,
+  })
+  error: string;
 }
 
 export class UnauthorizedResponseDto {
@@ -26,6 +32,12 @@ export class UnauthorizedResponseDto {
     type: String,
   })
   message: string;
+
+  @ApiProperty({
+    default: 'Unauthorized',
+    type: String,
+  })
+  error: string;
 }
 
 export class ForbiddenResponseDto {
@@ -36,10 +48,16 @@ export class ForbiddenResponseDto {
   statusCode: number;
 
   @ApiProperty({
-    default: 'Forbidden',
+    default: 'Forbidden resource',
     type: String,
   })
   message: string;
+
+  @ApiProperty({
+    default: 'Forbidden',
+    type: String,
+  })
+  error: string;
 }
 
 export class NotFoundResponseDto {
@@ -54,4 +72,10 @@ export class NotFoundResponseDto {
     type: String,
   })
   message: string;
+
+  @ApiProperty({
+    default: 'Not Found',
+    type: String,
+  })
+  error: string;
 }

@@ -13,6 +13,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -27,6 +28,7 @@ import { PreparePolicy } from '@/global/casl/policy-util.guard';
 import {
   BadRequestResponseDto,
   ForbiddenResponseDto,
+  NotFoundResponseDto,
   UnauthorizedResponseDto,
 } from '@/common/dto.common';
 
@@ -44,7 +46,7 @@ import {
   PaginationResult,
 } from '../dtos/shared/Pagination';
 import { GetUsersResponseDto } from '../dtos/get-users.dto';
-import { GetUserParamsDto } from '../dtos/get-user.dto';
+import { GetUserParamsDto, GetUserResponseDto } from '../dtos/get-user.dto';
 import { GetUserSChema } from '../validations/get-user.validation';
 import { I18nCustomService } from '@/global/i18n/i18n.service';
 
@@ -143,6 +145,31 @@ export class UsersController {
     };
   }
 
+  @ApiOperation({
+    summary: 'Get a user',
+    description: 'Get a user - Only admin can access this resource',
+  })
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid access token',
+    type: UnauthorizedResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden resource - Only admin can access this resource',
+    type: ForbiddenResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request - Invalid id',
+    type: BadRequestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    type: NotFoundResponseDto,
+  })
+  @ApiOkResponse({
+    description: 'Get user successfully',
+    type: GetUserResponseDto,
+  })
   @Get('/:id')
   @UseGuards(PreparePolicy, PoliciesGuard)
   @CheckPolicies(new ReadUserPolicyHandler())
