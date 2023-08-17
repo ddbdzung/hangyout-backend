@@ -46,6 +46,7 @@ import {
 import { GetUserResponseDto } from '../dtos/get-users.dto';
 import { GetUserParamsDto } from '../dtos/get-user.dto';
 import { GetUserSChema } from '../validations/get-user.validation';
+import { I18nCustomService } from '@/global/i18n/i18n.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -53,6 +54,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
+    private readonly i18n: I18nCustomService,
   ) {}
 
   @ApiOperation({
@@ -150,7 +152,9 @@ export class UsersController {
   ) {
     const user = await this.usersService.getUserById(getUserParamsDto.id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(
+        this.i18n.translate('user.GET_DETAIL_INFO_USER.USER_NOT_FOUND'),
+      );
     }
 
     return { user };
