@@ -14,6 +14,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 
 import { MongoDBService } from './services/mongo.service';
 import { AppModule } from '../src/app.module';
+import { Types } from 'mongoose';
 
 describe('UserController /users (e2e)', () => {
   let app: INestApplication;
@@ -52,6 +53,9 @@ describe('UserController /users (e2e)', () => {
     usersService = app.get<UsersService>(UsersService);
     // await mongodb.createIndex('users', { email: 1 }, { unique: true });
   });
+
+  // NOTE Check if user is deactivated or not
+  // NOTE Check if user is verify to use this API or not
 
   beforeEach(async () => {
     await mongodb.insertMany('users', [user]);
@@ -310,9 +314,88 @@ describe('UserController /users (e2e)', () => {
           fullname,
           role: ROLE.USER,
         });
-      console.log(response.body);
 
       expect(response.status).toBe(201);
+    });
+  });
+
+  describe('GET /:userId', () => {
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app.getHttpServer()).get(
+        `/users/${user._id}`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should return 403 if user is not authorized with ADMIN role', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      const { accessToken } = await authService.registerUserSession(userInDb);
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/${user._id}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it(`should return 403 if ${ROLE.ADMIN} role try to get ${ROLE.SUPERADMIN} user`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const superAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.SUPERADMIN,
+      });
+      const { accessToken } = await authService.registerUserSession(userInDb);
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/${superAdmin._id}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return 400 if user id is not valid', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/${'123'}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 404 if user is not found', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/${new Types.ObjectId()}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe('User not found');
+    });
+
+    it('should return 200 if user is found', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+
+      const response = await request(app.getHttpServer())
+        .get(`/users/${userInDb._id}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(200);
     });
   });
 });

@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
+  Param,
   Post,
   Query,
   UseGuards,
@@ -21,6 +23,7 @@ import { AuthService } from '@/modules/auth/services/auth.service';
 import { JoiValidationPipe } from '@/common/pipes/joi-validation.pipe';
 import { PoliciesGuard } from '@/global/casl/policy.guard';
 import { CheckPolicies } from '@/global/casl/Policy.decorator';
+import { PreparePolicy } from '@/global/casl/policy-util.guard';
 import {
   BadRequestResponseDto,
   ForbiddenResponseDto,
@@ -33,6 +36,7 @@ import { createUserSchema } from './../validations/create-user.validation';
 import { getUsersQuery } from '../validations/get-users.validation';
 import {
   CreateUserPolicyHandler,
+  ReadUserPolicyHandler,
   ReadUsersPolicyHandler,
 } from '../users.policy';
 import {
@@ -40,6 +44,8 @@ import {
   PaginationResult,
 } from '../dtos/shared/Pagination';
 import { GetUserResponseDto } from '../dtos/get-users.dto';
+import { GetUserParamsDto } from '../dtos/get-user.dto';
+import { GetUserSChema } from '../validations/get-user.validation';
 
 @ApiTags('users')
 @Controller('users')
@@ -133,5 +139,20 @@ export class UsersController {
       users,
       pagination,
     };
+  }
+
+  @Get('/:id')
+  @UseGuards(PreparePolicy, PoliciesGuard)
+  @CheckPolicies(new ReadUserPolicyHandler())
+  async getUser(
+    @Param(new JoiValidationPipe(GetUserSChema))
+    getUserParamsDto: GetUserParamsDto,
+  ) {
+    const user = await this.usersService.getUserById(getUserParamsDto.id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return { user };
   }
 }

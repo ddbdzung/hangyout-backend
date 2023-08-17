@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import { Action } from '@/global/casl/casl.constant';
+import { Action, RequestAttachment } from '@/global/casl/casl.constant';
 import { IPolicyHandler } from '@/global/casl/policy-handler';
 import { AppAbility, RequestUser } from '@/global/casl/casl-ability.factory';
 
@@ -9,6 +9,10 @@ import { AuthService } from '../auth/services/auth.service';
 import { CreateUserDto } from './dtos/create-users.dto';
 
 class PolicyHandlerUtil {
+  static getUserParam(request: Request) {
+    return request[RequestAttachment.PolicyParamUser];
+  }
+
   static mapRequestUserToUserDocument(requestUser: RequestUser) {
     return new HydratedUserDocument({
       _id: requestUser._id,
@@ -32,6 +36,14 @@ export class ReadUsersPolicyHandler implements IPolicyHandler {
   handle(ability: AppAbility, request: Request) {
     const requestUser = AuthService.getAuthenticatedRequestUser(request);
     const user = PolicyHandlerUtil.mapRequestUserToUserDocument(requestUser);
+    return ability.can(Action.Read, user);
+  }
+}
+
+export class ReadUserPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility, request: Request) {
+    const userFromParam = PolicyHandlerUtil.getUserParam(request);
+    const user = PolicyHandlerUtil.mapToUserDocument(userFromParam);
     return ability.can(Action.Read, user);
   }
 }
