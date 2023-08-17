@@ -43,7 +43,7 @@ import {
   PaginationQueryParam,
   PaginationResult,
 } from '../dtos/shared/Pagination';
-import { GetUserResponseDto } from '../dtos/get-users.dto';
+import { GetUsersResponseDto } from '../dtos/get-users.dto';
 import { GetUserParamsDto } from '../dtos/get-user.dto';
 import { GetUserSChema } from '../validations/get-user.validation';
 import { I18nCustomService } from '@/global/i18n/i18n.service';
@@ -91,7 +91,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOkResponse({
     description: 'Get users successfully',
-    type: GetUserResponseDto,
+    type: GetUsersResponseDto,
   })
   @ApiBadRequestResponse({
     description: 'Bad request - Invalid query params',
