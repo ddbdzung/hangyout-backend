@@ -41,6 +41,9 @@ export class CaslAbilityFactory {
           role: { $ne: ROLE.SUPERADMIN },
         });
         can(Action.Read, HydratedUserDocument);
+        can(Action.Update, HydratedUserDocument, {
+          role: { $ne: ROLE.SUPERADMIN },
+        });
         break;
 
       case ROLE.ADMIN:
@@ -49,6 +52,13 @@ export class CaslAbilityFactory {
         });
         can(Action.Read, HydratedUserDocument, {
           role: { $ne: ROLE.SUPERADMIN },
+        });
+        can(Action.Update, HydratedUserDocument, {
+          role: { $ne: ROLE.SUPERADMIN },
+        });
+        cannot(Action.Update, HydratedUserDocument, {
+          role: { $eq: ROLE.ADMIN },
+          _id: { $ne: user._id },
         });
         break;
 

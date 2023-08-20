@@ -1,17 +1,27 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Types, isObjectIdOrHexString } from 'mongoose';
+
+import { I18nCustomService } from '@/global/i18n/i18n.service';
 
 import { UserDocument } from '../schemas/user.schema';
 import { CreateUserDto } from '../dtos/create-users.dto';
 import { UserRepository } from '../repositories/user.repository';
 import { PaginationQueryParam } from '../dtos/shared/Pagination';
 import { ROLE } from '../users.constant';
+import { UpdateUserDto } from '../dtos/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly i18n: I18nCustomService,
+  ) {}
 
-  _transformObjectId(id: any) {
+  private _transformObjectId(id: any) {
     if (!isObjectIdOrHexString(id)) {
       throw new Error(
         'Must be a valid ObjectId or string of 24 hex characters',
@@ -38,6 +48,7 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto): Promise<UserDocument> {
     const isEmailTaken = await this.isEmailTaken(createUserDto.email);
     if (isEmailTaken) {
+      // TODO: Use i18n
       throw new BadRequestException('Email already taken');
     }
 
@@ -61,10 +72,42 @@ export class UsersService {
     return this.userRepository.findOneByEmail(email);
   }
 
-  async updateUser(
-    userId: Types.ObjectId,
-    updateUserDto: any,
+  private async _isEmailExist(email: string): Promise<boolean> {
+    const user = await this.userRepository.findOneByCondition(
+      { email },
+      '_id',
+      {
+        lean: true,
+      },
+    );
+    return !!user;
+  }
+
+  async updateUserById(
+    userId: Types.ObjectId | string,
+    updateUserDto: UpdateUserDto,
   ): Promise<UserDocument> {
-    return this.userRepository.updateOneById(userId, updateUserDto);
+    const id = this._transformObjectId(userId);
+    if (Object.keys(updateUserDto).length === 0) {
+      throw new BadRequestException(
+        this.i18n.translate('common.API.NO_DATA_TO_UPDATE'),
+      );
+    }
+
+    const updatedUser = await this.userRepository.findByConditionAndUpdate(
+      { _id: id },
+      updateUserDto,
+      {
+        projection: '-password',
+        new: true,
+      },
+    );
+    if (!updatedUser) {
+      throw new NotFoundException(
+        this.i18n.translate('user.UPDATE_USER.USER_NOT_FOUND'),
+      );
+    }
+
+    return updatedUser;
   }
 }

@@ -46,11 +46,11 @@ export class AuthGuard implements CanActivate {
 
       const user = await this.usersRepositoy.findOneByCondition(
         { _id: new Types.ObjectId(payload.sub) },
-        '_id email fullname role',
+        '_id email fullname role isVerified',
       );
 
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
-      if (!user || user.isVerified === false) {
+      if (!user || !user.isVerified) {
         throw new UnauthorizedException();
       }
 
