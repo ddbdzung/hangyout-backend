@@ -48,8 +48,12 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto): Promise<UserDocument> {
     const isEmailTaken = await this.isEmailTaken(createUserDto.email);
     if (isEmailTaken) {
-      // TODO: Use i18n
-      throw new BadRequestException('Email already taken');
+      console.log('here');
+      throw new BadRequestException(
+        this.i18n.translate('user.CREATE_USER.EMAIL_IS_TAKEN', {
+          args: { email: createUserDto.email },
+        }),
+      );
     }
 
     return this.userRepository.create(createUserDto);
