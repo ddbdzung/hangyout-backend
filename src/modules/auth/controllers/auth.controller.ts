@@ -136,6 +136,7 @@ export class AuthController {
       this.authService.updateVerifiedAccount(user),
     ]);
 
+    // TODO: Redirect to frontend when have frontend app ready to handle this route (frontend will redirect to login page)
     return { message: 'OK' };
   }
 

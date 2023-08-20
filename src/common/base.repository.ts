@@ -43,7 +43,7 @@ export class BaseRepository<T extends Document> {
     filter: any,
     update: any,
     options?: QueryOptions | null,
-  ): Promise<any> {
+  ) {
     return this.model.findOneAndUpdate(
       filter as FilterQuery<T>,
       update,
