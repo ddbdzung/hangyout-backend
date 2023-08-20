@@ -55,3 +55,11 @@ export class CreateUserPolicyHandler implements IPolicyHandler {
     return ability.can(Action.Create, newUser);
   }
 }
+
+export class UpdateUserPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility, request: Request) {
+    const userFromParam = PolicyHandlerUtil.getUserParam(request);
+    const user = PolicyHandlerUtil.mapToUserDocument(userFromParam);
+    return ability.can(Action.Update, user);
+  }
+}
