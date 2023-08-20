@@ -2,6 +2,7 @@ import * as Joi from 'joi';
 
 export const configuration = () => ({
   app: {
+    env: process.env.NODE_ENV,
     port: parseInt(process.env.PORT, 10),
     host: process.env.HOST,
     protocol: process.env.PROTOCOL,
