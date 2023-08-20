@@ -1,6 +1,7 @@
 import * as Joi from 'joi';
 import { ROLE } from '../users.constant';
 
+// TODO: Rename to createUserBody
 export const createUserSchema = Joi.object({
   email: Joi.string().required().email(),
   password: Joi.string().required().min(8).max(24),
