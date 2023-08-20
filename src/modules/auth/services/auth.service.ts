@@ -6,6 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { SentMessageInfo } from 'nodemailer';
 import * as mongoose from 'mongoose';
 import { Request } from 'express';
 
@@ -112,7 +113,7 @@ export class AuthService {
   async sendVerificationEmail(
     token: string,
     user: UserDocument,
-  ): Promise<void> {
+  ): Promise<SentMessageInfo> {
     const brand = this.configService.get('mailer.brand');
     const from = this.configService.get('mailer.from');
     const baseUrl = this.configService.get('app.baseUrl');
@@ -122,6 +123,10 @@ export class AuthService {
       to: user.email,
       ...createEmailVerification(from, brand, url, user),
     };
+
+    if (this.configService.get('app.env') !== 'production') {
+      return Promise.resolve({}) as SentMessageInfo;
+    }
 
     return this.mailerService.sendMail(email);
   }
