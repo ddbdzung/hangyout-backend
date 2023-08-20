@@ -8,6 +8,7 @@ export class LoggerService {
     const nodeEnv = process.env.NODE_ENV;
     if (!nodeEnv) throw new Error('NODE_ENV is undefined');
     if (nodeEnv === 'test') return;
+    if (nodeEnv === 'production' && tag === Tag.DEBUG) return;
 
     console.log(
       `[${this._colorizeText(tag, TagColor[tag])}]:${this._colorizeText(

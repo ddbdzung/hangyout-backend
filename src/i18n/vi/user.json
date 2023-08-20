@@ -1,5 +1,8 @@
 {
   "GET_DETAIL_INFO_USER": {
     "USER_NOT_FOUND": "Không tìm thấy người dùng"
+  },
+  "UPDATE_USER": {
+    "USER_NOT_FOUND": "Không tìm thấy người dùng"
   }
 }
