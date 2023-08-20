@@ -1,4 +1,7 @@
 {
+  "CREATE_USER": {
+    "EMAIL_IS_TAKEN": "Email {email} đã được sử dụng"
+  },
   "GET_DETAIL_INFO_USER": {
     "USER_NOT_FOUND": "Không tìm thấy người dùng"
   },

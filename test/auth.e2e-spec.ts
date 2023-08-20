@@ -442,6 +442,8 @@ describe('AuthController /auth (e2e)', () => {
     });
     it('should return 200 when user is authenticated', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.isVerified = true;
+      await userInDb.save();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .get('/auth/me')
