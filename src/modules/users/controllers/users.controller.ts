@@ -4,6 +4,7 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -40,6 +41,7 @@ import {
   CreateUserPolicyHandler,
   ReadUserPolicyHandler,
   ReadUsersPolicyHandler,
+  UpdateUserPolicyHandler,
 } from '../users.policy';
 import {
   PaginationQueryParam,
@@ -48,9 +50,20 @@ import {
 import { GetUsersResponseDto } from '../dtos/get-users.dto';
 import { GetUserParamsDto, GetUserResponseDto } from '../dtos/get-user.dto';
 import { GetUserSChema } from '../validations/get-user.validation';
+// TODO: Rearrange imports
 import { I18nCustomService } from '@/global/i18n/i18n.service';
+import {
+  updateUserBody,
+  updateUserParams,
+} from '../validations/update-user.validation';
+import {
+  UpdateUserDto,
+  UpdateUserParamsDto,
+  UpdateUserResponseDto,
+} from '../dtos/update-user.dto';
 
 @ApiTags('users')
+// TODO: Remove usePipes(), only use JoiValidationPipe inside DTO (@Body(), @Param(), @Query())
 @Controller('users')
 export class UsersController {
   constructor(
@@ -184,6 +197,49 @@ export class UsersController {
       );
     }
 
+    // TODO: Add excludeUserPassword()
+    // return { user: this.authService.excludeUserPassword(user) };
     return { user };
+  }
+
+  @ApiOperation({
+    summary: 'Update a user',
+    description: 'Update a user - Only admin can access this resource',
+  })
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid access token',
+    type: UnauthorizedResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden resource - Only admin can access this resource',
+    type: ForbiddenResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request - Invalid id',
+    type: BadRequestResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    type: NotFoundResponseDto,
+  })
+  @ApiOkResponse({
+    description: 'Update user successfully',
+    type: UpdateUserResponseDto,
+  })
+  @Patch('/:id')
+  @UseGuards(PreparePolicy, PoliciesGuard)
+  @CheckPolicies(new UpdateUserPolicyHandler())
+  async updateUser(
+    @Param(new JoiValidationPipe(updateUserParams))
+    updateUserParamsDto: UpdateUserParamsDto,
+    @Body(new JoiValidationPipe(updateUserBody)) updateUserDto: UpdateUserDto,
+  ) {
+    return {
+      user: await this.usersService.updateUserById(
+        updateUserParamsDto.id,
+        updateUserDto,
+      ),
+    };
   }
 }
