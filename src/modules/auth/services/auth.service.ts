@@ -6,7 +6,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { SentMessageInfo } from 'nodemailer';
 import * as mongoose from 'mongoose';
+import { Request } from 'express';
 
 import { UserRepository } from '@/modules/users/repositories/user.repository';
 import { UsersService } from '@/modules/users/services/users.service';
@@ -15,6 +17,7 @@ import { RedisService } from '@/global/redis/redis.service';
 import { I18nCustomService } from '@/global/i18n/i18n.service';
 import { getSecondFromJwtExpiresIn } from '@/utils/time';
 import { createEmailVerification } from '@/templates/EmailVerification';
+import { RequestUser } from '@/global/casl/casl-ability.factory';
 
 import {
   IRefreshTokenPayload,
@@ -25,9 +28,6 @@ import { LocalRegisterDto } from '../dtos/register.dto';
 import { TokenRepository } from '../repositories/token.repository';
 import { LocalLoginDto } from '../dtos/login.dto';
 import { TokenDocument } from '../schemas/token.schema';
-// TODO: Rearrange imports
-import { Request } from 'express';
-import { RequestUser } from '@/global/casl/casl-ability.factory';
 @Injectable()
 export class AuthService {
   constructor(
@@ -113,7 +113,7 @@ export class AuthService {
   async sendVerificationEmail(
     token: string,
     user: UserDocument,
-  ): Promise<void> {
+  ): Promise<SentMessageInfo> {
     const brand = this.configService.get('mailer.brand');
     const from = this.configService.get('mailer.from');
     const baseUrl = this.configService.get('app.baseUrl');
@@ -123,6 +123,10 @@ export class AuthService {
       to: user.email,
       ...createEmailVerification(from, brand, url, user),
     };
+
+    if (this.configService.get('app.env') !== 'production') {
+      return Promise.resolve({}) as SentMessageInfo;
+    }
 
     return this.mailerService.sendMail(email);
   }
