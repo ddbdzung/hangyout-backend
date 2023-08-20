@@ -8,7 +8,6 @@ import {
   Post,
   Query,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -32,10 +31,11 @@ import {
   NotFoundResponseDto,
   UnauthorizedResponseDto,
 } from '@/common/dto.common';
+import { I18nCustomService } from '@/global/i18n/i18n.service';
 
 import { UsersService } from './../services/users.service';
 import { CreateUserDto } from './../dtos/create-users.dto';
-import { createUserSchema } from './../validations/create-user.validation';
+import { createUserBody } from './../validations/create-user.validation';
 import { getUsersQuery } from '../validations/get-users.validation';
 import {
   CreateUserPolicyHandler,
@@ -49,9 +49,7 @@ import {
 } from '../dtos/shared/Pagination';
 import { GetUsersResponseDto } from '../dtos/get-users.dto';
 import { GetUserParamsDto, GetUserResponseDto } from '../dtos/get-user.dto';
-import { GetUserSChema } from '../validations/get-user.validation';
-// TODO: Rearrange imports
-import { I18nCustomService } from '@/global/i18n/i18n.service';
+import { getUserParams } from '../validations/get-user.validation';
 import {
   updateUserBody,
   updateUserParams,
@@ -63,7 +61,6 @@ import {
 } from '../dtos/update-user.dto';
 
 @ApiTags('users')
-// TODO: Remove usePipes(), only use JoiValidationPipe inside DTO (@Body(), @Param(), @Query())
 @Controller('users')
 export class UsersController {
   constructor(
@@ -90,10 +87,11 @@ export class UsersController {
     type: ForbiddenResponseDto,
   })
   @Post()
-  @UsePipes(new JoiValidationPipe(createUserSchema))
   @UseGuards(PoliciesGuard)
   @CheckPolicies(new CreateUserPolicyHandler())
-  async createUser(@Body() createUserDto: CreateUserDto) {
+  async createUser(
+    @Body(new JoiValidationPipe(createUserBody)) createUserDto: CreateUserDto,
+  ) {
     const createdUser = await this.usersService.createUser(createUserDto);
 
     return this.authService.excludeUserPassword(createdUser);
@@ -187,7 +185,7 @@ export class UsersController {
   @UseGuards(PreparePolicy, PoliciesGuard)
   @CheckPolicies(new ReadUserPolicyHandler())
   async getUser(
-    @Param(new JoiValidationPipe(GetUserSChema))
+    @Param(new JoiValidationPipe(getUserParams))
     getUserParamsDto: GetUserParamsDto,
   ) {
     const user = await this.usersService.getUserById(getUserParamsDto.id);
@@ -197,9 +195,7 @@ export class UsersController {
       );
     }
 
-    // TODO: Add excludeUserPassword()
-    // return { user: this.authService.excludeUserPassword(user) };
-    return { user };
+    return { user: this.authService.excludeUserPassword(user) };
   }
 
   @ApiOperation({

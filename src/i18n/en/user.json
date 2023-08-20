@@ -1,4 +1,7 @@
 {
+  "CREATE_USER": {
+    "EMAIL_IS_TAKEN": "Email {email} is taken"
+  },
   "GET_DETAIL_INFO_USER": {
     "USER_NOT_FOUND": "User not found"
   },
