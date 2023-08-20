@@ -1,5 +1,8 @@
 {
   "GET_DETAIL_INFO_USER": {
     "USER_NOT_FOUND": "User not found"
+  },
+  "UPDATE_USER": {
+    "USER_NOT_FOUND": "User not found"
   }
 }

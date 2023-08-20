@@ -15,6 +15,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { MongoDBService } from './services/mongo.service';
 import { AppModule } from '../src/app.module';
 import { Types } from 'mongoose';
+import { UpdateUserDto } from '@/modules/users/dtos/update-user.dto';
 
 describe('UserController /users (e2e)', () => {
   let app: INestApplication;
@@ -22,7 +23,7 @@ describe('UserController /users (e2e)', () => {
   let mongodb: MongoDBService;
   let authService: AuthService;
   let usersService: UsersService;
-  let i18n;
+  let i18n: I18nService;
   let password;
   let user;
 
@@ -44,7 +45,7 @@ describe('UserController /users (e2e)', () => {
       role: ROLE.USER,
       avatar: faker.image.avatar(),
       bio: faker.lorem.paragraph(),
-      isVerified: false,
+      isVerified: true,
     };
 
     mongodb = new MongoDBService();
@@ -93,7 +94,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 200 when user is authorized with ADMIN role', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .get('/users/')
@@ -126,7 +127,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if email is not provided', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .post('/users/')
@@ -139,7 +140,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if email is not valid', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .post('/users/')
@@ -152,7 +153,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if email is already existed', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .post('/users/')
@@ -165,7 +166,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if password is not provided', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .post('/users/')
@@ -178,7 +179,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if password is not valid', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
         .post('/users/')
@@ -191,7 +192,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if fullname is not provided', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const { accessToken } = await authService.registerUserSession(userInDb);
       const password = faker.internet.password();
       const response = await request(app.getHttpServer())
@@ -205,7 +206,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if fullname is not valid', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const password = faker.internet.password();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
@@ -224,7 +225,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 400 if role is not valid', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const password = faker.internet.password();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
@@ -243,7 +244,7 @@ describe('UserController /users (e2e)', () => {
     it(`should return 403 if role is ${ROLE.ADMIN} created by another ${ROLE.ADMIN}`, async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const password = faker.internet.password();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
@@ -262,7 +263,7 @@ describe('UserController /users (e2e)', () => {
     it(`should return 403 if role is ${ROLE.SUPERADMIN} created by another ${ROLE.SUPERADMIN}`, async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const password = faker.internet.password();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
@@ -281,7 +282,7 @@ describe('UserController /users (e2e)', () => {
     it(`should return 403 if role is ${ROLE.SUPERADMIN} created by another ${ROLE.ADMIN}`, async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const password = faker.internet.password();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const response = await request(app.getHttpServer())
@@ -300,7 +301,7 @@ describe('UserController /users (e2e)', () => {
     it('should return 201 if user is created successfully', async () => {
       const userInDb = await usersService.getUserByEmail(user.email);
       userInDb.role = ROLE.ADMIN;
-      await usersService.updateUser(userInDb._id, userInDb.toObject());
+      await usersService.updateUserById(userInDb._id, userInDb.toObject());
       const password = faker.internet.password();
       const { accessToken } = await authService.registerUserSession(userInDb);
       const fullname = faker.person.fullName();
@@ -319,7 +320,7 @@ describe('UserController /users (e2e)', () => {
     });
   });
 
-  describe('GET /:userId', () => {
+  describe('GET /:id', () => {
     it('should return 401 if user is not authenticated', async () => {
       const response = await request(app.getHttpServer()).get(
         `/users/${user._id}`,
@@ -394,6 +395,187 @@ describe('UserController /users (e2e)', () => {
       const response = await request(app.getHttpServer())
         .get(`/users/${userInDb._id}`)
         .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(200);
+    });
+  });
+
+  describe('PATCH /:id', () => {
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app.getHttpServer()).patch(
+        `/users/${user._id}`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should return 403 if user is not authorized with ADMIN role', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch('/users/123')
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return 400 if user id is not valid', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch('/users/123')
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(400);
+    });
+
+    it(`should return 403 if ${ROLE.ADMIN} try to update ${ROLE.SUPERADMIN}`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const superAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.SUPERADMIN,
+      });
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${superAdmin._id}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it(`should return 403 if ${ROLE.ADMIN} try to update another ${ROLE.ADMIN}`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const anotherAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.ADMIN,
+      });
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherAdmin._id}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it(`should return 403 if ${ROLE.SUPERADMIN} try to update ${ROLE.SUPERADMIN} himself`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.SUPERADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userInDb._id}`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return 404 if user is not found', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const updateDocument = new UpdateUserDto({
+        bio: 'new bio',
+      });
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${new Types.ObjectId()}`)
+        .set('Authorization', 'Bearer ' + accessToken)
+        .send(updateDocument);
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe(
+        i18n.translate('user.UPDATE_USER.USER_NOT_FOUND'),
+      );
+    });
+
+    it(`should return 200 if ${ROLE.ADMIN} updated ${ROLE.ADMIN} himself successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const updateDocument = new UpdateUserDto({
+        bio: 'new bio',
+      });
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userInDb._id}`)
+        .set('Authorization', 'Bearer ' + accessToken)
+        .send(updateDocument);
+
+      expect(response.status).toBe(200);
+    });
+
+    it(`should return 200 if ${ROLE.SUPERADMIN} updated ${ROLE.ADMIN} successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.SUPERADMIN;
+      await userInDb.save();
+      const anotherAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.ADMIN,
+      });
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const updateDocument = new UpdateUserDto({
+        bio: 'new bio',
+      });
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherAdmin._id}`)
+        .set('Authorization', 'Bearer ' + accessToken)
+        .send(updateDocument);
+
+      expect(response.status).toBe(200);
+    });
+
+    it(`should return 200 if ${ROLE.SUPERADMIN} updated ${ROLE.USER} successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.SUPERADMIN;
+      await userInDb.save();
+      const anotherUser = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.USER,
+      });
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const updateDocument = new UpdateUserDto({
+        bio: 'new bio',
+      });
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherUser._id}`)
+        .set('Authorization', 'Bearer ' + accessToken)
+        .send(updateDocument);
+
+      expect(response.status).toBe(200);
+    });
+
+    it(`should return 200 if ${ROLE.ADMIN} updated ${ROLE.USER} successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+      const anotherUser = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.USER,
+      });
+      const updateDocument = new UpdateUserDto({
+        bio: 'new bio',
+      });
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherUser._id}`)
+        .set('Authorization', 'Bearer ' + accessToken)
+        .send(updateDocument);
 
       expect(response.status).toBe(200);
     });
