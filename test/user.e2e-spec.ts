@@ -580,4 +580,159 @@ describe('UserController /users (e2e)', () => {
       expect(response.status).toBe(200);
     });
   });
+
+  describe('PATCH /:id/deactivate', () => {
+    it('should return 401 if user is not authenticated', async () => {
+      const response = await request(app.getHttpServer()).patch(
+        `/users/${user._id}/deactivate`,
+      );
+
+      expect(response.status).toBe(401);
+    });
+
+    it('should return 403 if user is not authorized with ADMIN role', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch('/users/123/deactivate')
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return 400 if user id is not valid', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch('/users/123/deactivate')
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(400);
+    });
+
+    it(`should return 403 if ${ROLE.ADMIN} try to deactivate ${ROLE.SUPERADMIN}`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+
+      const superAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.SUPERADMIN,
+      });
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${superAdmin._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it(`should return 403 if ${ROLE.ADMIN} try to deactivate another ${ROLE.ADMIN}`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+
+      const anotherAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.ADMIN,
+      });
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherAdmin._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it(`should return 403 if ${ROLE.SUPERADMIN} try to deactivate ${ROLE.SUPERADMIN} himself`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.SUPERADMIN;
+      await userInDb.save();
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userInDb._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it(`should return 403 if ${ROLE.ADMIN} deactivated ${ROLE.ADMIN} himself`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${userInDb._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('should return 404 if user is not found', async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${new Types.ObjectId()}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(404);
+      expect(response.body.message).toBe(
+        i18n.translate('user.DEACTIVATE_USER.USER_NOT_FOUND'),
+      );
+    });
+
+    it(`should return 200 if ${ROLE.SUPERADMIN} deactivated ${ROLE.USER} successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.SUPERADMIN;
+      await userInDb.save();
+
+      const anotherUser = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.USER,
+      });
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherUser._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(200);
+    });
+
+    it(`should return 200 if ${ROLE.ADMIN} deactivated ${ROLE.USER} successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.ADMIN;
+      await userInDb.save();
+
+      const anotherUser = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.USER,
+      });
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherUser._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(200);
+    });
+  });
 });

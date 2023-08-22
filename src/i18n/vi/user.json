@@ -7,5 +7,8 @@
   },
   "UPDATE_USER": {
     "USER_NOT_FOUND": "Không tìm thấy người dùng"
+  },
+  "DEACTIVATE_USER": {
+    "USER_NOT_FOUND": "Không tìm thấy người dùng"
   }
 }
