@@ -39,6 +39,7 @@ import { createUserBody } from './../validations/create-user.validation';
 import { getUsersQuery } from '../validations/get-users.validation';
 import {
   CreateUserPolicyHandler,
+  DeactivateUserPolicyHandler,
   ReadUserPolicyHandler,
   ReadUsersPolicyHandler,
   UpdateUserPolicyHandler,
@@ -59,6 +60,11 @@ import {
   UpdateUserParamsDto,
   UpdateUserResponseDto,
 } from '../dtos/update-user.dto';
+import {
+  DeactivateUserParamsDto,
+  DeactivateUserResponseDto,
+} from '../dtos/deactivate-user.dto';
+import { deactivateUserParams } from '../validations/deactivate-user.validation';
 
 @ApiTags('users')
 @Controller('users')
@@ -237,5 +243,41 @@ export class UsersController {
         updateUserDto,
       ),
     };
+  }
+
+  // TODO: Write custom decorator to check if user is deactivated or not
+  // NOTE: Only apply for specific routes - controller scopes
+  @ApiOperation({
+    summary: 'Deactivate a user',
+    description: 'Deactivate a user - Only admin can access this resource',
+  })
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid access token',
+    type: UnauthorizedResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Forbidden resource - Only admin can access this resource',
+    type: ForbiddenResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request - Invalid id',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    type: NotFoundResponseDto,
+  })
+  @ApiOkResponse({
+    description: 'Deactivate user successfully',
+    type: DeactivateUserResponseDto,
+  })
+  @Patch('/:id/deactivate')
+  @UseGuards(PreparePolicy, PoliciesGuard)
+  @CheckPolicies(new DeactivateUserPolicyHandler())
+  async deactivateUser(
+    @Param(new JoiValidationPipe(deactivateUserParams))
+    deactivateUserParamsDto: DeactivateUserParamsDto,
+  ) {
+    return this.usersService.deactivateUserById(deactivateUserParamsDto.id);
   }
 }

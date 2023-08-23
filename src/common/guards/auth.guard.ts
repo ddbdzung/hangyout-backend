@@ -15,6 +15,7 @@ import { UserRepository } from '@/modules/users/repositories/user.repository';
 import { LoggerService } from '@/global/logger/logger.service';
 import { Tag } from '@/global/logger/logger.constant';
 
+// TODO: Write guards to use decorator checking in controller scopes
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -50,6 +51,9 @@ export class AuthGuard implements CanActivate {
       );
 
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
+      // TODO: Change policy to check if user is verified
+      // NOTE: Only apply for specific routes - controller scopes
+      // NOTE: Write decorator to check if user is verified
       if (!user || !user.isVerified) {
         throw new UnauthorizedException();
       }

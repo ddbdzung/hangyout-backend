@@ -63,3 +63,10 @@ export class UpdateUserPolicyHandler implements IPolicyHandler {
     return ability.can(Action.Update, user);
   }
 }
+export class DeactivateUserPolicyHandler implements IPolicyHandler {
+  handle(ability: AppAbility, request: Request) {
+    const userFromParam = PolicyHandlerUtil.getUserParam(request);
+    const user = PolicyHandlerUtil.mapToUserDocument(userFromParam);
+    return ability.can(Action.Deactivate, user);
+  }
+}
