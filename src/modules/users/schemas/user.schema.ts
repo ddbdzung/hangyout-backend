@@ -21,6 +21,7 @@ export class HydratedUserDocument {
   avatar: string;
   bio: string;
   isVerified: boolean;
+  isDeactivated: boolean;
   phoneNumber: {
     value: string;
     isHidden: boolean;
@@ -143,6 +144,13 @@ export class User {
   })
   @Prop({ default: false })
   isVerified: boolean;
+
+  @ApiProperty({
+    type: Boolean,
+    default: false,
+  })
+  @Prop({ default: false })
+  isDeactivated: boolean;
 
   @ApiProperty({ type: PhoneNumber })
   phoneNumber: PhoneNumber;

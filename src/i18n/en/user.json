@@ -9,6 +9,8 @@
     "USER_NOT_FOUND": "User not found"
   },
   "DEACTIVATE_USER": {
-    "USER_NOT_FOUND": "User not found"
+    "USER_NOT_FOUND": "User not found",
+    "SUCCESS": "User deactivated",
+    "USER_ALREADY_DEACTIVATED": "User already deactivated"
   }
 }

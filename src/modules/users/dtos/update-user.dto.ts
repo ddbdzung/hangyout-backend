@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserResponse } from './shared/UserResponse';
+// TODO: Remove unused variables
 import { GENDER, ROLE } from '../users.constant';
 
 class CanHidePropertyDto {
