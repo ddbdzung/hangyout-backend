@@ -23,6 +23,8 @@ import { Request, Response } from 'express';
 import { JoiValidationPipe } from '@/common/pipes/joi-validation.pipe';
 import { Public } from '@/common/decorators/Public.decorator';
 import { BadRequestResponseDto } from '@/common/dto.common';
+import { AllowNonVerifiedUser } from '@/common/decorators/Is-verified-user.decorator';
+import { AllowInactiveUser } from '@/common/decorators/Active-user.decorator';
 
 import { AuthService } from './../services/auth.service';
 import {
@@ -136,7 +138,6 @@ export class AuthController {
       this.authService.updateVerifiedAccount(user),
     ]);
 
-    // TODO: Redirect to frontend when have frontend app ready to handle this route (frontend will redirect to login page)
     return { message: 'OK' };
   }
 
@@ -185,6 +186,8 @@ export class AuthController {
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Invalid access token',
   })
+  @AllowNonVerifiedUser()
+  @AllowInactiveUser()
   @Get('/me')
   async getMe(@Req() req: Request) {
     const requestUser = AuthService.getAuthenticatedRequestUser(req);

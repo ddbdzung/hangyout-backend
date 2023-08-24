@@ -7,5 +7,10 @@
   },
   "UPDATE_USER": {
     "USER_NOT_FOUND": "Không tìm thấy người dùng"
+  },
+  "DEACTIVATE_USER": {
+    "USER_NOT_FOUND": "Không tìm thấy người dùng",
+    "SUCCESS": "Người dùng đã được vô hiệu hóa",
+    "USER_ALREADY_DEACTIVATED": "Người dùng đã bị vô hiệu hóa trước đó"
   }
 }

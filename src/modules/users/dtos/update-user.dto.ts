@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserResponse } from './shared/UserResponse';
-import { GENDER, ROLE } from '../users.constant';
+import { GENDER } from '../users.constant';
 
 class CanHidePropertyDto {
   value: any;

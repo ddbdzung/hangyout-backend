@@ -114,4 +114,32 @@ export class UsersService {
 
     return updatedUser;
   }
+
+  async deactivateUserById(userId: Types.ObjectId | string) {
+    const id = this._transformObjectId(userId);
+    const user = await this.userRepository.findOneByCondition({ _id: id });
+
+    if (!user) {
+      throw new NotFoundException(
+        this.i18n.translate('user.DEACTIVATE_USER.USER_NOT_FOUND'),
+      );
+    }
+
+    if (user.isDeactivated) {
+      return {
+        isModified: false,
+        message: this.i18n.translate(
+          'user.DEACTIVATE_USER.USER_ALREADY_DEACTIVATED',
+        ),
+      };
+    }
+
+    user.isDeactivated = true;
+    await user.save();
+
+    return {
+      isModified: true,
+      message: this.i18n.translate('user.DEACTIVATE_USER.SUCCESS'),
+    };
+  }
 }

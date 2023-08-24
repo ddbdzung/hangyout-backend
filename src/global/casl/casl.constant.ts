@@ -4,6 +4,9 @@ export enum Action {
   Read = 'read',
   Update = 'update',
   Delete = 'delete',
+
+  // Advanced extends actions
+  Deactivate = 'deactivate',
 }
 
 export enum RequestAttachment {
