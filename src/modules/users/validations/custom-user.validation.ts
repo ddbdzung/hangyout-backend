@@ -1,4 +1,4 @@
-import { allTimeZone } from '@/common/all-time-zone.common';
+import { allTimeZone } from '@/common/libs/all-time-zone.common';
 
 export const objectId = (value, helpers) => {
   if (!value.match(/^[0-9a-fA-F]{24}$/)) {

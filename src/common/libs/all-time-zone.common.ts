@@ -1,4 +1,3 @@
-// TODO: Move to common/libs folder later
 export const allTimeZone = [
   {
     name: 'Afghanistan',

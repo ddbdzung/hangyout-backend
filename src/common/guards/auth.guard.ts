@@ -15,6 +15,9 @@ import { UserRepository } from '@/modules/users/repositories/user.repository';
 import { LoggerService } from '@/global/logger/logger.service';
 import { Tag } from '@/global/logger/logger.constant';
 
+import { IS_NON_VERIFIED_USER_KEY } from '../decorators/Is-verified-user.decorator';
+import { IS_INACTIVE_USER_KEY } from '../decorators/Active-user.decorator';
+
 // TODO: Write guards to use decorator checking in controller scopes
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -30,6 +33,16 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+    const allowBothVerifiedAndNonVerifiedUser =
+      this.reflector.getAllAndOverride<boolean>(IS_NON_VERIFIED_USER_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+    const allowBothInactiveAndActiveUser =
+      this.reflector.getAllAndOverride<boolean>(IS_INACTIVE_USER_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
     if (isPublic) {
       return true;
     }
@@ -47,14 +60,30 @@ export class AuthGuard implements CanActivate {
 
       const user = await this.usersRepositoy.findOneByCondition(
         { _id: new Types.ObjectId(payload.sub) },
-        '_id email fullname role isVerified',
+        '_id email fullname role isVerified isDeactivated',
       );
 
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
       // TODO: Change policy to check if user is verified
       // NOTE: Only apply for specific routes - controller scopes
       // NOTE: Write decorator to check if user is verified
-      if (!user || !user.isVerified) {
+      if (!user) {
+        throw new UnauthorizedException();
+      }
+      console.log(
+        'allowBothVerifiedAndNonVerifiedUser',
+        allowBothVerifiedAndNonVerifiedUser,
+      );
+      console.log(
+        'allowBothInactiveAndActiveUser',
+        allowBothInactiveAndActiveUser,
+      );
+
+      if (!user.isVerified && !allowBothVerifiedAndNonVerifiedUser) {
+        throw new UnauthorizedException();
+      }
+
+      if (user.isDeactivated && !allowBothInactiveAndActiveUser) {
         throw new UnauthorizedException();
       }
 
