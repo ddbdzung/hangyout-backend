@@ -18,7 +18,6 @@ import { Tag } from '@/global/logger/logger.constant';
 import { IS_NON_VERIFIED_USER_KEY } from '../decorators/Is-verified-user.decorator';
 import { IS_INACTIVE_USER_KEY } from '../decorators/Active-user.decorator';
 
-// TODO: Write guards to use decorator checking in controller scopes
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
@@ -64,9 +63,6 @@ export class AuthGuard implements CanActivate {
       );
 
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
-      // TODO: Change policy to check if user is verified
-      // NOTE: Only apply for specific routes - controller scopes
-      // NOTE: Write decorator to check if user is verified
       if (!user) {
         throw new UnauthorizedException();
       }

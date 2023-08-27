@@ -245,8 +245,6 @@ export class UsersController {
     };
   }
 
-  // TODO: Write custom decorator to check if user is deactivated or not
-  // NOTE: Only apply for specific routes - controller scopes
   @ApiOperation({
     summary: 'Deactivate a user',
     description: 'Deactivate a user - Only admin can access this resource',
