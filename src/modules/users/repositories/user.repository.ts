@@ -7,6 +7,11 @@ import { BaseRepository } from '@/common/base.repository';
 
 import { UserDocument } from '../schemas/user.schema';
 
+export interface IQueryMongooseOptions {
+  select?: string;
+  lean?: boolean;
+}
+
 @Injectable()
 export class UserRepository extends BaseRepository<UserDocument> {
   constructor(
@@ -19,8 +24,13 @@ export class UserRepository extends BaseRepository<UserDocument> {
     return this.userModel.countDocuments(filter);
   }
 
-  async findOneByEmail(email: string): Promise<UserDocument> {
-    return this.userModel.findOne({ email });
+  async findOneByEmail(
+    email: string,
+    queryMongooseOptions: IQueryMongooseOptions = { select: null, lean: false },
+  ): Promise<UserDocument> {
+    const { select, ...options } = queryMongooseOptions;
+
+    return this.userModel.findOne({ email }, select, { ...options });
   }
 
   async comparePassword(
