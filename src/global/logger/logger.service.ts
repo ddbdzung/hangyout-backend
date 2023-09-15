@@ -14,7 +14,7 @@ export class LoggerService {
       `[${this._colorizeText(tag, TagColor[tag])}]:${this._colorizeText(
         this._getTimestamp(),
         TagColor.DEBUG,
-      )}: ${content}`,
+      )}: [${content}]`,
       ...args,
     );
   }

@@ -14,6 +14,7 @@ import { IS_PUBLIC_KEY } from '@/common/decorators/Public.decorator';
 import { UserRepository } from '@/modules/users/repositories/user.repository';
 import { LoggerService } from '@/global/logger/logger.service';
 import { Tag } from '@/global/logger/logger.constant';
+import { I18nCustomService } from '@/global/i18n/i18n.service';
 
 import { IS_NON_VERIFIED_USER_KEY } from '../decorators/Is-verified-user.decorator';
 import { IS_INACTIVE_USER_KEY } from '../decorators/Active-user.decorator';
@@ -25,6 +26,7 @@ export class AuthGuard implements CanActivate {
     private reflector: Reflector,
     private configService: ConfigService,
     private usersRepositoy: UserRepository,
+    private i18n: I18nCustomService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -49,7 +51,9 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this._extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        this.i18n.translate('auth.TOKEN.MISSING_TOKEN'),
+      );
     }
 
     try {
@@ -62,30 +66,35 @@ export class AuthGuard implements CanActivate {
         '_id email fullname role isVerified isDeactivated',
       );
 
+      if (user.email !== payload.email) {
+        throw new UnauthorizedException(
+          this.i18n.translate('auth.UNAUTHORIZED.ACCOUNT_EMAIL_CHANGED'),
+        );
+      }
+
       LoggerService.log(Tag.INFO, 'UserSessionInfo', user);
       if (!user) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(
+          this.i18n.translate('auth.UNAUTHORIZED.ACCOUNT_NOT_EXIST'),
+        );
       }
-      console.log(
-        'allowBothVerifiedAndNonVerifiedUser',
-        allowBothVerifiedAndNonVerifiedUser,
-      );
-      console.log(
-        'allowBothInactiveAndActiveUser',
-        allowBothInactiveAndActiveUser,
-      );
 
       if (!user.isVerified && !allowBothVerifiedAndNonVerifiedUser) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(
+          this.i18n.translate('auth.UNAUTHORIZED.ACCOUNT_NOT_VERIFIED'),
+        );
       }
 
       if (user.isDeactivated && !allowBothInactiveAndActiveUser) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException(
+          this.i18n.translate('auth.UNAUTHORIZED.ACCOUNT_DEACTIVATED'),
+        );
       }
 
       request['user'] = user;
     } catch (error) {
-      throw new UnauthorizedException();
+      LoggerService.log(Tag.DEBUG, 'AuthGuard', error.message);
+      throw new UnauthorizedException(error?.response);
     }
     return true;
   }

@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { UserResponse } from './shared/UserResponse';
 import { GenderDto, PhoneNumberDto } from './shared/User';
+import { UserResponse } from './shared/UserResponse';
 
-export class UpdateUserDto {
-  constructor(partial: Partial<UpdateUserDto>) {
+export class UpdatePersonalInfoDto {
+  constructor(partial: Partial<UpdatePersonalInfoDto>) {
     Object.assign(this, partial);
   }
 
@@ -13,16 +13,15 @@ export class UpdateUserDto {
     type: String,
     minLength: 1,
     maxLength: 50,
-    required: true,
   })
   readonly fullname: string;
 
   @ApiProperty({
-    example: 'Abcdef123!@#$',
+    example: 'example@hotmail.com',
     type: String,
-    required: true,
+    maxLength: 50,
   })
-  readonly password: string;
+  readonly email: string;
 
   @ApiProperty({
     example: 'https://example.com/avatar.png',
@@ -38,30 +37,14 @@ export class UpdateUserDto {
   })
   readonly bio: string;
 
-  @ApiProperty({
-    example: true,
-    type: Boolean,
-  })
-  readonly isVerified: boolean;
-
   readonly phoneNumber: PhoneNumberDto;
   readonly gender: GenderDto;
 }
 
-export class UpdateUserResponseDto {
+export class UpdatePersonalInfoResponseDto {
   @ApiProperty({
     description: 'User',
     type: UserResponse,
   })
   readonly user: UserResponse;
-}
-
-export class UpdateUserParamsDto {
-  @ApiProperty({
-    description: 'User id',
-    type: String,
-    required: true,
-    example: '60f1b2b3b3f4c3b3f4b3f4b3',
-  })
-  readonly id: string;
 }

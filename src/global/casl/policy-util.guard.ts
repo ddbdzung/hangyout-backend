@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { Types, isObjectIdOrHexString } from 'mongoose';
+import { Request } from 'express';
 
 import { UserRepository } from '@/modules/users/repositories/user.repository';
 
@@ -28,7 +29,7 @@ export class PreparePolicy implements CanActivate {
   }
 
   async canActivate(context: ExecutionContext): Promise<true> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest() as Request;
     const isUserRoute = request.url.includes('/users');
 
     try {

@@ -46,6 +46,7 @@ describe('UserController /users (e2e)', () => {
       avatar: faker.image.avatar(),
       bio: faker.lorem.paragraph(),
       isVerified: true,
+      isDeactivated: false,
     };
 
     mongodb = new MongoDBService();
@@ -734,5 +735,28 @@ describe('UserController /users (e2e)', () => {
 
       expect(response.status).toBe(200);
     });
+
+    it(`should return 200 if ${ROLE.SUPERADMIN} deactivated ${ROLE.ADMIN} successfully`, async () => {
+      const userInDb = await usersService.getUserByEmail(user.email);
+      userInDb.role = ROLE.SUPERADMIN;
+      await userInDb.save();
+
+      const anotherAdmin = await usersService.createUser({
+        email: faker.internet.email(),
+        password: faker.internet.password(),
+        fullname: faker.person.fullName(),
+        role: ROLE.ADMIN,
+      });
+
+      const { accessToken } = await authService.registerUserSession(userInDb);
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${anotherAdmin._id}/deactivate`)
+        .set('Authorization', 'Bearer ' + accessToken);
+
+      expect(response.status).toBe(200);
+    });
   });
+
+  // TODO: Implement test for PATCH /:id/activate
+  // describe('PATCH /:id/activate', () => {});
 });

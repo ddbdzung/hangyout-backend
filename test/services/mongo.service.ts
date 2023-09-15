@@ -59,6 +59,13 @@ export class MongoDBService {
     await collection.createIndex(index, options);
   }
 
+  async isIndexExists(collectionName: string, index: string) {
+    const indexes = await this.getCollectionByName(collectionName)
+      .listIndexes()
+      .toArray();
+    return indexes.some(i => i.name === index);
+  }
+
   async insertMany(collectionName: string, docs: any[]): Promise<any> {
     const collection = this.getCollectionByName(collectionName.toLowerCase());
     return collection.insertMany(docs);

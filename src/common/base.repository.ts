@@ -98,4 +98,16 @@ export class BaseRepository<T extends Document> {
   async populate(documents: T[], populate: any): Promise<any> {
     return this.model.populate(documents, populate);
   }
+
+  async atomicUpdate(
+    filter: any,
+    updateDto: Record<string, any>,
+    options?: QueryOptions | null,
+  ) {
+    return this.model.findOneAndUpdate(
+      filter as FilterQuery<T>,
+      updateDto,
+      options,
+    );
+  }
 }
