@@ -1,10 +1,11 @@
-import { MiddlewareConsumer, Module, CacheModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
+import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerModuleOptions, ThrottlerOptions } from '@nestjs/throttler';
 import * as path from 'path';
 import * as mongoose from 'mongoose';
 
@@ -50,15 +51,24 @@ const toMsFromSecond = (second: number): number => second * 1000;
       },
       inject: [ConfigService],
     }),
-    // https://github.com/kkoomen/nestjs-throttler-storage-redis
+    /**
+     * @see https://github.com/kkoomen/nestjs-throttler-storage-redis
+     */
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        ttl: config.get('throttle.ttl'),
-        limit: config.get('throttle.limit'),
-        storage: new ThrottlerStorageRedisService(),
-      }),
+      useFactory: (config: ConfigService) => {
+        const throttlers: ThrottlerOptions[] = [{
+          ttl: config.get('throttle.ttl'),
+          limit: config.get('throttle.limit'),
+        }]
+        const options: ThrottlerModuleOptions = {
+          throttlers,
+          storage: new ThrottlerStorageRedisService(),
+        }
+
+        return options
+      }
     }),
     I18nModule.forRootAsync({
       useFactory: () => ({
