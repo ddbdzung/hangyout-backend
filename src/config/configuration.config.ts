@@ -47,6 +47,12 @@ export const configuration = () => ({
     from: process.env.MAIL_FROM || process.env.DEV_MAIL_FROM,
     brand: process.env.MAIL_BRAND_NAME,
   },
+  searchEngine: {
+    elasticsearch: {
+      node: process.env.ELASTICSEARCH_NODE,
+      index: process.env.ELASTICSEARCH_INDEX,
+    },
+  },
 });
 
 export const validationSchema = Joi.object({
@@ -123,4 +129,6 @@ export const validationSchema = Joi.object({
     then: Joi.string().email().required(),
     otherwise: Joi.string().email(),
   }),
+  ELASTICSEARCH_NODE: Joi.string().trim().required(),
+  ELASTICSEARCH_INDEX: Joi.string().trim().required(),
 });

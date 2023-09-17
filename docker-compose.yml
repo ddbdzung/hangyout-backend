@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+  redis:
+    container_name: redis
+    image: redis
+    networks:
+      - local_network
+    deploy:
+      resources:
+        limits:
+          cpus: "5.0"
+          memory: 500M
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+  elasticsearch:
+    image: elasticsearch:8.9.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+    networks:
+      - local_network
+    deploy:
+      resources:
+        limits:
+          cpus: "5.0"
+          memory: 1000M
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+volumes:
+  redis:
+    driver: local
+  elasticsearch-data:
+    driver: local
+  
+networks:
+  local_network:
+    driver: bridge
+
+# set vm.max_map_count=262144 in linux server if error occurs

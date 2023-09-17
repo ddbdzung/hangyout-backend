@@ -5,7 +5,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { HeaderResolver, I18nModule } from 'nestjs-i18n';
-import { ThrottlerModule, ThrottlerModuleOptions, ThrottlerOptions } from '@nestjs/throttler';
+import { ElasticsearchModule } from '@nestjs/elasticsearch';
+import {
+  ThrottlerModule,
+  ThrottlerModuleOptions,
+  ThrottlerOptions,
+} from '@nestjs/throttler';
 import * as path from 'path';
 import * as mongoose from 'mongoose';
 
@@ -27,6 +32,7 @@ import './global/casl/casl-ability.factory';
 import { CaslModule } from './global/casl/casl.module';
 import { LoggerService } from './global/logger/logger.service';
 import { Tag } from './global/logger/logger.constant';
+import { ElasticsearchCustomModule } from './global/elasticsearch/elasticsearch.module';
 
 const ENV = process.env.NODE_ENV;
 const toMsFromSecond = (second: number): number => second * 1000;
@@ -58,17 +64,19 @@ const toMsFromSecond = (second: number): number => second * 1000;
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const throttlers: ThrottlerOptions[] = [{
-          ttl: config.get('throttle.ttl'),
-          limit: config.get('throttle.limit'),
-        }]
+        const throttlers: ThrottlerOptions[] = [
+          {
+            ttl: config.get('throttle.ttl'),
+            limit: config.get('throttle.limit'),
+          },
+        ];
         const options: ThrottlerModuleOptions = {
           throttlers,
           storage: new ThrottlerStorageRedisService(),
-        }
+        };
 
-        return options
-      }
+        return options;
+      },
     }),
     I18nModule.forRootAsync({
       useFactory: () => ({
@@ -121,11 +129,19 @@ const toMsFromSecond = (second: number): number => second * 1000;
         };
       },
     }),
+    ElasticsearchModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        node: config.get('searchEngine.elasticsearch.node'),
+      }),
+    }),
     CaslModule,
     UsersModule,
     AuthModule,
     I18nCustomModule,
     RedisModule,
+    ElasticsearchCustomModule,
   ],
   controllers: [AppController],
   providers: [
