@@ -8,7 +8,7 @@ import {
   CaslAbilityFactory,
   RequestUser,
 } from './casl-ability.factory';
-import { CHECK_POLICIES_KEY } from './policy.decorator';
+import { CHECK_POLICIES_KEY } from './Policy.decorator';
 
 @Injectable()
 export class PoliciesGuard implements CanActivate {

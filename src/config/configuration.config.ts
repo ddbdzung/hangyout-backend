@@ -47,6 +47,16 @@ export const configuration = () => ({
     from: process.env.MAIL_FROM || process.env.DEV_MAIL_FROM,
     brand: process.env.MAIL_BRAND_NAME,
   },
+  searchEngine: {
+    elasticsearch: {
+      node: process.env.ELASTICSEARCH_NODE,
+      indices: {
+        userProfile: process.env.ELASTICSEARCH_INDEX_PROFILE,
+      },
+      username: process.env.ELASTICSEARCH_USERNAME,
+      password: process.env.ELASTICSEARCH_PASSWORD,
+    },
+  },
 });
 
 export const validationSchema = Joi.object({

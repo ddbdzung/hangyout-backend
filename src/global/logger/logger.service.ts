@@ -11,10 +11,9 @@ export class LoggerService {
     if (nodeEnv === 'production' && tag === Tag.DEBUG) return;
 
     console.log(
-      `[${this._colorizeText(tag, TagColor[tag])}]:${this._colorizeText(
-        this._getTimestamp(),
-        TagColor.DEBUG,
-      )}: [${content}]`,
+      `${this._colorizeText(this._getTimestamp(), TagColor.DEBUG)}`,
+      `${this._colorizeText(tag.toLowerCase(), TagColor[tag])}:`,
+      `[${content}]`,
       ...args,
     );
   }
