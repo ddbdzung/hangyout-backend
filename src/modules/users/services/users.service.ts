@@ -117,7 +117,10 @@ export class UsersService {
 
   async deactivateUserById(userId: Types.ObjectId | string) {
     const id = this._transformObjectId(userId);
-    const user = await this.userRepository.findOneByCondition({ _id: id });
+    const user = await this.userRepository.findOneByCondition(
+      { _id: id },
+      '-password',
+    );
 
     if (!user) {
       throw new NotFoundException(
@@ -127,6 +130,7 @@ export class UsersService {
 
     if (user.isDeactivated) {
       return {
+        user: null,
         isModified: false,
         message: this.i18n.translate(
           'user.DEACTIVATE_USER.USER_ALREADY_DEACTIVATED',
@@ -138,6 +142,7 @@ export class UsersService {
     await user.save();
 
     return {
+      user,
       isModified: true,
       message: this.i18n.translate('user.DEACTIVATE_USER.SUCCESS'),
     };

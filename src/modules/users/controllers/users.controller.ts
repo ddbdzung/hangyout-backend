@@ -99,6 +99,7 @@ export class UsersController {
     @Body(new JoiValidationPipe(createUserBody)) createUserDto: CreateUserDto,
   ) {
     const createdUser = await this.usersService.createUser(createUserDto);
+    await this.authService.syncUserToElasticsearch(createdUser);
 
     return this.authService.excludeUserPassword(createdUser);
   }
@@ -237,11 +238,14 @@ export class UsersController {
     updateUserParamsDto: UpdateUserParamsDto,
     @Body(new JoiValidationPipe(updateUserBody)) updateUserDto: UpdateUserDto,
   ) {
+    const updatedUser = await this.usersService.updateUserById(
+      updateUserParamsDto.id,
+      updateUserDto,
+    );
+    await this.authService.syncUserToElasticsearch(updatedUser);
+
     return {
-      user: await this.usersService.updateUserById(
-        updateUserParamsDto.id,
-        updateUserDto,
-      ),
+      user: updatedUser,
     };
   }
 
@@ -276,6 +280,13 @@ export class UsersController {
     @Param(new JoiValidationPipe(deactivateUserParams))
     deactivateUserParamsDto: DeactivateUserParamsDto,
   ) {
-    return this.usersService.deactivateUserById(deactivateUserParamsDto.id);
+    const result = await this.usersService.deactivateUserById(
+      deactivateUserParamsDto.id,
+    );
+    if (result.isModified) {
+      await this.authService.syncUserToElasticsearch(result.user);
+    }
+
+    return result;
   }
 }

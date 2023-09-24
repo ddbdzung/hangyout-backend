@@ -72,17 +72,23 @@ export class AuthController {
     @Body() localRegisterDto: LocalRegisterDto,
   ) {
     const user = await this.authService.createLocalUser(localRegisterDto);
-    const { accessToken, refreshToken } =
+    const pSyncUserToElasticsearch =
+      this.authService.syncUserToElasticsearch(user);
+    const pRegisterUserSession =
       await this.authService.registerUserSession(user);
 
+    const [, tokens] = await Promise.all([
+      pSyncUserToElasticsearch,
+      pRegisterUserSession,
+    ]);
+
     res.json({
+      tokens,
       user: this.authService.excludeUserPassword(user),
-      tokens: { accessToken, refreshToken },
     });
 
-    const verificationToken = await this.authService.createVerificationToken(
-      user,
-    );
+    const verificationToken =
+      await this.authService.createVerificationToken(user);
     await Promise.all([
       this.authService.saveVerifyEmailToken(verificationToken),
       this.authService.sendVerificationEmail(verificationToken, user),
@@ -133,10 +139,11 @@ export class AuthController {
   ) {
     const { token } = query;
     const { user, tokenInDB } = await this.authService.verifyEmailToken(token);
-    await Promise.all([
+    const [, updatedUser] = await Promise.all([
       this.authService.deleteVerifyEmailToken(tokenInDB),
       this.authService.updateVerifiedAccount(user),
     ]);
+    await this.authService.syncUserToElasticsearch(updatedUser);
 
     return { message: 'OK' };
   }
@@ -158,9 +165,8 @@ export class AuthController {
   @UsePipes(new JoiValidationPipe(refreshTokenBody))
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
     const { refreshToken: token } = refreshTokenDto;
-    const { user, tokenInDB } = await this.authService.verifyRefreshToken(
-      token,
-    );
+    const { user, tokenInDB } =
+      await this.authService.verifyRefreshToken(token);
 
     const pUnregisterUserSession =
       this.authService.unregisterUserSession(tokenInDB);

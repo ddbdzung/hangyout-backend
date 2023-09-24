@@ -21,4 +21,18 @@ export class ProfileRepository extends BaseRepository<UserDocument> {
   ) {
     return this.atomicUpdate({ _id: userId }, updateDto, options);
   }
+
+  async getUsersByIds(ids: Types.ObjectId[], projection = '-password') {
+    return this.findAllByCondition(
+      {
+        _id: {
+          $in: ids,
+        },
+      },
+      projection,
+      {
+        lean: true,
+      },
+    );
+  }
 }

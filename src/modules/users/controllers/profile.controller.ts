@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Body, Controller, Patch, Req } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Query, Req } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -24,6 +24,11 @@ import {
   UpdatePersonalInfoDto,
   UpdatePersonalInfoResponseDto,
 } from '../dtos/update-personal-info.dto';
+import { searchProfileQuery } from '../validations/search-profile.validation';
+import {
+  SearchProfileQueryParam,
+  SearchProfileResponseDto,
+} from '../dtos/search-profile.dto';
 
 @ApiTags('profile')
 @Controller('p')
@@ -60,11 +65,38 @@ export class ProfileController {
     updatePersonalInformationDto: UpdatePersonalInfoDto,
   ) {
     const requestUser = AuthService.getAuthenticatedRequestUser(request);
-    const result = await this.profileService.updatePersonalInfo(
+    const user = await this.profileService.updatePersonalInfo(
       requestUser,
       updatePersonalInformationDto,
     );
+    await this.profileService.syncUserToElasticsearch(user);
 
-    return result;
+    return user;
+  }
+
+  @ApiOperation({
+    summary: 'Search profile',
+    description: 'Search profile',
+  })
+  @ApiOkResponse({
+    description: 'OK - Search profile successfully',
+    type: SearchProfileResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad request - Invalid request query',
+    type: BadRequestResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Invalid access token',
+    type: UnauthorizedResponseDto,
+  })
+  @Get('/search')
+  async searchProfile(
+    @Query(new JoiValidationPipe(searchProfileQuery))
+    query: SearchProfileQueryParam,
+  ) {
+    const result = await this.profileService.searchProfile(query.q);
+
+    return { items: result };
   }
 }

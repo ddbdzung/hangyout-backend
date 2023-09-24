@@ -11,6 +11,7 @@ import { LoggerService } from '../logger/logger.service';
 import { Tag } from '../logger/logger.constant';
 import { IndexDocumentBuilderV8 } from './builders/bulk-insert.builder';
 import { DeleteResponse } from './types';
+import { IQueryResponse } from './interfaces/IQueryResponse';
 
 @Injectable()
 export class ElasticsearchCustomService {
@@ -132,7 +133,7 @@ export class ElasticsearchCustomService {
     });
   }
 
-  async searchMultiFields(query: string, fields: string[]): Promise<any> {
+  async searchMultiFields<T>(query: string, fields: string[]) {
     const tieBreaker = fields.length > 0 ? 1.0 / fields.length : 0;
     return this.elasticsearchService.search({
       index: 'user_profile',
@@ -140,13 +141,12 @@ export class ElasticsearchCustomService {
         query: {
           multi_match: {
             query,
-            fields,
+            fields: fields.map(i => i.concat('.complete')),
             type: 'best_fields',
             tie_breaker: tieBreaker,
-            fuzziness: 'AUTO',
           },
         },
       },
-    });
+    }) as Promise<IQueryResponse<T>>;
   }
 }

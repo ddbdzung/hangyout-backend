@@ -5,6 +5,7 @@ import { UsersModule } from '@/modules/users/users.module';
 import { RedisModule } from '@/global/redis/redis.module';
 import { I18nCustomModule } from '@/global/i18n/i18n.module';
 import { CaslModule } from '@/global/casl/casl.module';
+import { ElasticsearchCustomModule } from '@/global/elasticsearch/elasticsearch.module';
 
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
@@ -23,6 +24,7 @@ import { Token, TokenFactory } from './schemas/token.schema';
     forwardRef(() => UsersModule),
     I18nCustomModule,
     CaslModule,
+    ElasticsearchCustomModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, TokenRepository],

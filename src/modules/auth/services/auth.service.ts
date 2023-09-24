@@ -18,6 +18,8 @@ import { I18nCustomService } from '@/global/i18n/i18n.service';
 import { getSecondFromJwtExpiresIn } from '@/utils/time';
 import { createEmailVerification } from '@/templates/EmailVerification';
 import { RequestUser } from '@/global/casl/casl-ability.factory';
+import { ElasticsearchCustomService } from '@/global/elasticsearch/elasticsearch.service';
+import { IUserProfile } from '@/global/elasticsearch/interfaces/IUserProfile';
 
 import {
   IRefreshTokenPayload,
@@ -28,6 +30,7 @@ import { LocalRegisterDto } from '../dtos/register.dto';
 import { TokenRepository } from '../repositories/token.repository';
 import { LocalLoginDto } from '../dtos/login.dto';
 import { TokenDocument } from '../schemas/token.schema';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -39,6 +42,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly i18n: I18nCustomService,
     private readonly mailerService: MailerService,
+    private readonly elasticsearchService: ElasticsearchCustomService,
   ) {}
 
   static getAuthenticatedRequestUser(req: Request) {
@@ -78,6 +82,22 @@ export class AuthService {
       getSecondFromJwtExpiresIn(
         this.configService.get('jwt.expiresIn.refresh'),
       ),
+    );
+  }
+
+  async syncUserToElasticsearch(user: UserDocument) {
+    const userProfile: IUserProfile = {
+      id: user._id.toString(),
+      isDeactivated: user.isDeactivated,
+      email: user.email,
+      fullname: user.fullname,
+      role: user.role,
+      isVerified: user.isVerified,
+    };
+    await this.elasticsearchService.insertOneDocument(
+      this.configService.get('searchEngine.elasticsearch.indices.userProfile'),
+      userProfile,
+      user._id.toString(),
     );
   }
 
@@ -174,11 +194,12 @@ export class AuthService {
   }
 
   excludeUserPassword(user: UserDocument) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...userWithoutPassword } = user.toObject();
     return userWithoutPassword;
   }
 
-  async createLocalUser(localRegisterDto: LocalRegisterDto): Promise<any> {
+  async createLocalUser(localRegisterDto: LocalRegisterDto) {
     const { email } = localRegisterDto;
 
     if (await this.userService.isEmailTaken(email)) {

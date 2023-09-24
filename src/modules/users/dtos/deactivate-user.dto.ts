@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { UserResponse } from './shared/UserResponse';
+
 export class DeactivateUserParamsDto {
   @ApiProperty({
     description: 'User id',
@@ -11,6 +13,12 @@ export class DeactivateUserParamsDto {
 }
 
 export class DeactivateUserResponseDto {
+  @ApiProperty({
+    description: 'User',
+    type: UserResponse,
+  })
+  user: UserResponse;
+
   @ApiProperty({
     description: 'Message response',
     type: String,

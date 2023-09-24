@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { CaslModule } from '@/global/casl/casl.module';
 import { I18nCustomModule } from '@/global/i18n/i18n.module';
+import { ElasticsearchCustomModule } from '@/global/elasticsearch/elasticsearch.module';
 
 import { User, UserFactory } from './schemas/user.schema';
 import { UsersService } from './services/users.service';
@@ -24,6 +25,7 @@ import { ProfileRepository } from './repositories/profile.repository';
     forwardRef(() => AuthModule),
     CaslModule,
     I18nCustomModule,
+    ElasticsearchCustomModule,
   ],
   controllers: [UsersController, ProfileController],
   providers: [UsersService, UserRepository, ProfileRepository, ProfileService],
