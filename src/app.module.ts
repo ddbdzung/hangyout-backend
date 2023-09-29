@@ -31,6 +31,7 @@ import { CaslModule } from './global/casl/casl.module';
 import { LoggerService } from './global/logger/logger.service';
 import { Tag } from './global/logger/logger.constant';
 import { ElasticsearchCustomModule } from './global/elasticsearch/elasticsearch.module';
+import { FriendshipModule } from './modules/friendship/friendship.module';
 
 const ENV = process.env.NODE_ENV;
 const toMsFromSecond = (second: number): number => second * 1000;
@@ -130,6 +131,7 @@ const toMsFromSecond = (second: number): number => second * 1000;
     CaslModule,
     UsersModule,
     AuthModule,
+    FriendshipModule,
     I18nCustomModule,
     RedisModule,
     ElasticsearchCustomModule,
